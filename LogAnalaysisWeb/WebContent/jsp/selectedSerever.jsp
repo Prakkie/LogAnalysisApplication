@@ -1,7 +1,9 @@
 <%@ page import="com.visualpath.hadoop.loganalysis.dto.BrowsersInfo" %>
 <%@ page import="com.visualpath.hadoop.loganalysis.dto.MonthlyHits" %>
+<%@ page import="com.visualpath.hadoop.loganalysis.dto.SelectedSereverHits" %>
+<%@ page import="com.visualpath.hadoop.loganalysis.utill.LogAnalysisUtill" %>
 <%@ page isELIgnored="false" %>
-
+<% String selServer=(String)request.getAttribute("selServer");%>  
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -13,10 +15,10 @@
 <link href="css/default.css" rel="stylesheet" type="text/css" media="all" />
 <link href="css/fonts.css" rel="stylesheet" type="text/css" media="all" />
 <!--[if IE 6]><link href="default_ie6.css" rel="stylesheet" type="text/css" /><![endif]-->
-
 <script src="js/jquery-1.9.1.js" type="text/javascript"></script>
 <script src="js/highcharts/highcharts.js" type="text/javascript"></script>
 <script type="text/javascript">
+	
 	var chromeBrowser = ${browserDeatils.getChrome()};
 	var firefoxBrowser = ${browserDeatils.getFirefox()};
 	var safariBrowser = ${browserDeatils.getSafari()};
@@ -24,14 +26,12 @@
 	var geckoBrowser = ${browserDeatils.getGecko()};
 	var appleBrowser = ${browserDeatils.getAppleWebKit()};
 	var totalBrowserCount = chromeBrowser+firefoxBrowser+safariBrowser+ieBrowser+geckoBrowser+appleBrowser;
-	var splunk = ${hits.getSplunkYearly()};
-	var www = ${hits.getWwwYearly()};
-	
+	var server = "\'<%= selServer%> \'";
+	var res = server.split("'");
+	//alert(res[1]);
 	$(function() {
-		var splunkMonth = ${hits.getSplunk()};
-		var wwwMonth = ${hits.getWww()};
-		var splunk_Month = JSON.parse("[" + splunkMonth + "]");
-		var www_Month = JSON.parse("[" + wwwMonth + "]");
+		var monthlyhits = ${hits.getServer()};
+		var monthlyHits = JSON.parse("[" + monthlyhits + "]");
 		$('#plottedGraph')
 				.highcharts(
 						{
@@ -69,24 +69,8 @@
 							},
 							series : [
 									{
-										name : 'Apache Server',
-										data : [ 7.0, 6.9, 9.5, 14.5, 18.2,
-												21.5, 25.2, 26.5, 23.3, 18.3,
-												13.9, 9.6 ]
-									},
-									{
-										name : 'WWW',
-										data : www_Month
-									},
-									{
-										name : 'Websphere Server',
-										data : [ -0.9, 0.6, 3.5, 8.4, 13.5,
-												17.0, 18.6, 17.9, 14.3, 9.0,
-												3.9, 1.0 ]
-									},
-									{
-										name : 'Splunk',
-										data : splunk_Month
+										name : res[1] ,
+										data : monthlyHits
 									} ]
 						});
 	});
@@ -133,10 +117,9 @@
 						});
 	});
 	$(function() {
-		var splunkAvg = ${hits.getSplunkAvg()};
-		var wwwAvg = ${hits.getWwwAvg()};
-		var splunk_Avg = JSON.parse("[" + splunkAvg + "]");
-		var www_Avg = JSON.parse("[" + wwwAvg + "]");
+		//selServer = ${hits.getSelServer()};
+		var avghits = ${hits.getServerAvg()};
+		var avgHits = JSON.parse("[" + avghits + "]");
 		$('#barChart')
 				.highcharts(
 						{
@@ -176,41 +159,16 @@
 							},
 							series : [
 									{
-										name : 'Apache Server',
-										data : [ 0, 0.5, 1.4, 0.2,
-												0, 0, 0, 0,
-												9, 8, 1, 4 ]
-
-									},
-									{
-										name : 'WWW',
-										data : www_Avg
-
-									},
-									{
-										name : 'Splunk',
-										data : splunk_Avg
-
-									},
-									{
-										name : 'Websphere Server',
-										data : [ 0.4, 0, 0, 2, 3,
-												4, 5, 6, 7, 1,
-												3, 2 ]
-
-									},
-									{
-										name : 'Tomact Server',
-										data : [ 3, 2, 2, 2, 2,
-												4, 4, 4, 4, 4,
-												2, 4 ]
+										name : res[1] ,
+										data : avgHits
 
 									} ]
 						});
 	});
 	$(function() {
-		var splunkList = JSON.parse("[" + splunk + "]");
-		var wwwList = JSON.parse("[" + www + "]");
+		//selServer = ${hits.getSelServer()};
+		var yearlyhits = ${hits.getServerYearly()};;
+		var yearlyHits = JSON.parse("[" + yearlyhits + "]");
 		
 		$('#stackedArea').highcharts({
 			chart : {
@@ -256,29 +214,20 @@
 				}
 			},
 			
-			series : [ {
-				name : 'Apache Server',
-				data : [0,0,0,0,0]
-			}, {
-				name : 'WWW',
-				data : wwwList
-			}, {
-				name : 'Splunk',
-				data : splunkList
-			}, {
-				name : 'Websphere Server',
-				data : [0,0,0,0,0]
-			}, {
-				name : 'Tomact Server',
-				data : [0,0,0,0,0]
-			} ]
+			series : [  {
+				name : res[1] ,
+				data : yearlyHits
+			}]
 		});
 	});
 
 	function doOnValueSubmit() {
 		var selectedServer = $("#dropdown").val();
-		//alert(selectedServer);
+		alert(selectedServer);
 		document.location.href = "SelectedServer?param=" + selectedServer + "";
+	}
+	function getServer(selserver){
+		alert(selserver);
 	}
 </script>
 <style type="text/css">
